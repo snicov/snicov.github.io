@@ -6,25 +6,49 @@ body {
 }
 
 header {
-    background: #333;
-    color: #fff;
-    padding: 1rem 0;
-    text-align: center;
+    background: #fff;
+    border-bottom: 1px solid #eaeaea;
+    padding: 10px 0;
 }
 
-nav ul {
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+header h1 a {
+    text-decoration: none;
+    color: #333;
+}
+
+header nav ul {
     list-style: none;
     padding: 0;
+    margin: 0;
+    display: flex;
 }
 
-nav ul li {
-    display: inline;
-    margin: 0 10px;
+header nav ul li {
+    margin-left: 20px;
 }
 
-nav ul li a {
-    color: #fff;
+header nav ul li a {
     text-decoration: none;
+    color: #333;
+    font-size: 16px;
+}
+
+header nav ul li a:hover {
+    text-decoration: underline;
 }
 
 main {
