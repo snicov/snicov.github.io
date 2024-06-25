@@ -1,99 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Stock Correlation Calculator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research | Your Name</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Stock Correlation Calculator</h1>
-    <form id="stockForm">
-        <label for="symbol1">Enter Stock Symbol 1:</label>
-        <input type="text" id="symbol1" required><br><br>
-        
-        <label for="symbol2">Enter Stock Symbol 2:</label>
-        <input type="text" id="symbol2" required><br><br>
-        
-        <label for="start_date">Start Date:</label>
-        <input type="date" id="start_date" required><br><br>
-        
-        <label for="end_date">End Date:</label>
-        <input type="date" id="end_date" required><br><br>
-        
-        <input type="submit" value="Calculate Correlation">
-    </form>
-    
-    <h2 id="correlationResult" style="display:none;">Correlation Coefficient:</h2>
-    <p id="correlationValue" style="display:none;"></p>
-
-    <script>
-        document.getElementById('stockForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            
-            const symbol1 = document.getElementById('symbol1').value.toUpperCase();
-            const symbol2 = document.getElementById('symbol2').value.toUpperCase();
-            const startDate = document.getElementById('start_date').value;
-            const endDate = document.getElementById('end_date').value;
-            
-            const apiKey = 'QG0E1M3M4QBGGVYG';
-            
-            fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol1}&apikey=${apiKey}`)
-                .then(response => response.json())
-                .then(data1 => {
-                    const stockPrices1 = Object.values(data1['Time Series (Daily)']).map(entry => parseFloat(entry['5. adjusted close']));
-                    
-                    fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol2}&apikey=${apiKey}`)
-                        .then(response => response.json())
-                        .then(data2 => {
-                            const stockPrices2 = Object.values(data2['Time Series (Daily)']).map(entry => parseFloat(entry['5. adjusted close']));
-                            
-                            // Filter prices within the specified date range
-                            const filteredPrices1 = filterByDate(stockPrices1, startDate, endDate);
-                            const filteredPrices2 = filterByDate(stockPrices2, startDate, endDate);
-
-                            // Calculate correlation using a simple method (you may use a more precise algorithm)
-                            const correlationCoefficient = calculateCorrelation(filteredPrices1, filteredPrices2);
-                            
-                            document.getElementById('correlationResult').style.display = 'block';
-                            document.getElementById('correlationValue').style.display = 'block';
-                            document.getElementById('correlationValue').textContent = `The correlation coefficient between ${symbol1} and ${symbol2} is: ${correlationCoefficient}`;
-                        })
-                        .catch(error => console.error('Error fetching data for symbol 2:', error));
-                })
-                .catch(error => console.error('Error fetching data for symbol 1:', error));
-        });
-
-        function filterByDate(prices, startDate, endDate) {
-            return prices.filter((price, index) => {
-                const date = Object.keys(data1['Time Series (Daily)'])[index];
-                return date >= startDate && date <= endDate;
-            });
-        }
-
-        function calculateCorrelation(data1, data2) {
-            if (data1.length !== data2.length) {
-                throw new Error('Arrays must have the same length');
-            }
-            
-            const mean1 = data1.reduce((acc, val) => acc + val, 0) / data1.length;
-            const mean2 = data2.reduce((acc, val) => acc + val, 0) / data2.length;
-
-            let covariance = 0;
-            let variance1 = 0;
-            let variance2 = 0;
-
-            for (let i = 0; i < data1.length; i++) {
-                const diff1 = data1[i] - mean1;
-                const diff2 = data2[i] - mean2;
-
-                covariance += diff1 * diff2;
-                variance1 += diff1 * diff1;
-                variance2 += diff2 * diff2;
-            }
-
-            covariance /= data1.length;
-            const correlationCoefficient = covariance / Math.sqrt(variance1 * variance2);
-
-            return correlationCoefficient;
-        }
-    </script>
+    <header>
+        <h1>Your Name</h1>
+        <nav>
+            <ul>
+                <li><a href="#research">Research</a></li>
+                <li><a href="#software">Software</a></li>
+                <li><a href="#publications">Publications</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="research">
+            <h2>Research</h2>
+            <div id="research-content"></div>
+        </section>
+        <section id="software">
+            <h2>Software</h2>
+            <div id="software-content"></div>
+        </section>
+        <section id="publications">
+            <h2>Publications</h2>
+            <div id="publications-content"></div>
+        </section>
+    </main>
+    <script src="scripts.js"></script>
 </body>
 </html>
