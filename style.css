@@ -11,6 +11,14 @@ body {
     border: none;
 }
 
+#about {
+    text-align: left;
+    padding: 20px;
+    margin: 0 auto;
+    max-width: 80%;
+    box-sizing: border-box;
+}
+
 header {
     background: #fff;
     border-bottom: 1px solid #eaeaea;
