@@ -32,6 +32,13 @@ img .post-image {
     width: 25vw; /* Sets the width to a quarter of the viewport width */
 }
 
+.genart {
+    display: inline-block; /* Makes the image a block element */
+    margin-left: auto; /* Centers the image horizontally */
+    margin-right: auto; /* Centers the image horizontally */
+    width: 25vw; /* Sets the width to a quarter of the viewport width */
+}
+
 header .container {
     display: flex;
     justify-content: space-between;
