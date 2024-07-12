@@ -39,6 +39,22 @@ img .post-image {
     width: 25vw; /* Sets the width to a quarter of the viewport width */
 }
 
+.course-description {
+            display: none;
+            margin-left: 20px;
+}
+
+.course-title {
+            cursor: pointer;
+            font-weight: bold;
+}
+
+.course-title:hover {
+            text-decoration: underline;
+            color: gray;
+}
+
+
 header .container {
     display: flex;
     justify-content: space-between;
