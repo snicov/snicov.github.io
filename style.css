@@ -49,10 +49,10 @@ img .post-image {
             font-weight: bold;
 }
 
-.course-title:hover {
-            text-decoration: underline;
-            color: gray;
-}
+summary:hover {
+      text-decoration: underline;
+      cursor: pointer;
+    }
 
 
 header .container {

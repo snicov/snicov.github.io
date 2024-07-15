@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Regression #3 | Stefan Nicov</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("15.07.24.md")
+                .then(response => {
+                    console.log('Fetch response:', response);
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok " + response.statusText);
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    console.log('Markdown content:', text);
+                    document.getElementById("content").innerHTML = marked.parse(text); // Use marked.parse() for parsing markdown content
+                    MathJax.typeset(); // Re-render MathJax after setting innerHTML
+                })
+                .catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                    document.getElementById("content").innerHTML = "<p>Error loading the post. Please try again later.</p>";
+                });
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><a href="../index.html">Stefan Nicov</a></h1>
+            <nav>
+                <ul>
+                    <li><a href="../about.html">About Me</a></li>
+                    <li><a href="../blog.html">Blog</a></li>
+                    <li><a href="../research.html">Research</a></li>
+                    <li><a href="../teaching.html">Teaching</a></li>
+                    <li><a href="../physics.html">Physics</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section id="blog-post">
+            <h2>Linear Regression #3</h2>
+            <div id="content"></div>
+        </section>
+    </main>
+</body>
+</html>
