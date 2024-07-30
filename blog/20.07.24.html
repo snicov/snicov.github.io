@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CuteTree | Stefan Nicov</title>
     <link rel="stylesheet" href="../style.css">
+    <link rel="preload" href="20.07.24.md" as="fetch" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -16,22 +17,23 @@
             }
         };
         document.addEventListener("DOMContentLoaded", function() {
-            fetch("20.07.24.md")
+            fetch("20.07.24.md?v=" + new Date().getTime())
                 .then(response => {
-                    console.log('Fetch response:', response);
                     if (!response.ok) {
-                        throw new Error("Network response was not ok " + response.statusText);
+                        throw new Error("Network response was not ok: " + response.statusText);
                     }
                     return response.text();
                 })
                 .then(text => {
-                    console.log('Markdown content:', text);
-                    document.getElementById("content").innerHTML = marked.parse(text); // Use marked.parse() for parsing markdown content
-                    MathJax.typeset(); // Re-render MathJax after setting innerHTML
+                    document.getElementById("content").innerHTML = marked.parse(text);
+                    MathJax.typeset(); // Ensure MathJax rendering
                 })
                 .catch(error => {
-                    console.error('There has been a problem with your fetch operation:', error);
+                    console.error('Fetch operation error:', error);
                     document.getElementById("content").innerHTML = "<p>Error loading the post. Please try again later.</p>";
+                    setTimeout(function() {
+                    location.reload();
+                }, 50); // 5000 milliseconds = 5 seconds
                 });
         });
     </script>

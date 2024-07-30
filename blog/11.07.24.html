@@ -32,6 +32,9 @@
                 .catch(error => {
                     console.error('There has been a problem with your fetch operation:', error);
                     document.getElementById("content").innerHTML = "<p>Error loading the post. Please try again later.</p>";
+                    setTimeout(function() {
+                    location.reload();
+                }, 50); // 5000 milliseconds = 5 seconds
                 });
         });
     </script>
