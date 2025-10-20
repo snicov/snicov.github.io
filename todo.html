@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>To-Do + Hourly Reminder</title>
+<style>
+  :root {
+    --bg: #0f172a;        /* slate-900 */
+    --card: #111827;      /* gray-900 */
+    --muted: #94a3b8;     /* slate-400 */
+    --text: #e5e7eb;      /* gray-200 */
+    --accent: #60a5fa;    /* blue-400 */
+    --accent-strong: #3b82f6; /* blue-500 */
+    --danger: #ef4444;    /* red-500 */
+    --ok: #22c55e;        /* green-500 */
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --radius: 16px;
+  }
+  html, body {
+    height: 100%;
+    background: radial-gradient(1200px 800px at 80% -10%, #1f2937 0%, var(--bg) 55%);
+    color: var(--text);
+    margin: 0;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  }
+  .wrap {
+    max-width: 860px;
+    margin: 48px auto;
+    padding: 0 16px;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: clamp(22px, 4vw, 32px);
+    margin: 0;
+    letter-spacing: .3px;
+  }
+  .card {
+    background: linear-gradient(180deg, #0b1220 0%, var(--card) 100%);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .toolbar {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .toolbar input[type="text"] {
+    background: #0b1220;
+    border: 1px solid rgba(255,255,255,.08);
+    color: var(--text);
+    padding: 12px 14px;
+    border-radius: 12px;
+    outline: none;
+  }
+  .toolbar button, .toolbar select {
+    border: 1px solid rgba(255,255,255,.08);
+    background: #0b1220;
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .toolbar button.primary {
+    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+  }
+  .toolbar .interval {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toolbar .interval input {
+    width: 90px;
+    background: #0b1220;
+    border: 1px solid rgba(255,255,255,.08);
+    color: var(--text);
+    padding: 10px 12px; border-radius: 12px; outline: none;
+  }
+  .meta {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    padding: 12px 16px; font-size: 14px; color: var(--muted);
+  }
+  .list {
+    padding: 8px 8px 16px 8px;
+  }
+  .item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 12px;
+    margin: 8px;
+    background: rgba(255,255,255,.02);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 12px;
+  }
+  .item input[type="checkbox"] { width: 18px; height: 18px; }
+  .title {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .title .text.done { text-decoration: line-through; opacity: .6; }
+  .title small { color: var(--muted); }
+  .actions {
+    display: flex; gap: 8px;
+  }
+  .btn {
+    padding: 6px 10px; border-radius: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,.08);
+    background: #0b1220; color: var(--text); font-size: 12px;
+  }
+  .btn.danger { border-color: rgba(239,68,68,.4); color: #fecaca; }
+  .status {
+    margin-top: 16px; font-size: 13px; color: var(--muted);
+  }
+  .pill {
+    display:inline-flex; align-items:center; gap:6px;
+    background: rgba(96,165,250,.15);
+    color: #bfdbfe;
+    border: 1px solid rgba(96,165,250,.35);
+    padding: 6px 10px; border-radius: 999px; font-size: 12px;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>To-Do + Hourly Reminder</h1>
+      <button id="notifyBtn" class="btn">Enable Notifications</button>
+    </header>
+
+    <section class="card">
+      <div class="toolbar">
+        <input id="taskInput" type="text" placeholder="Add a task and press Enter or + Add…" />
+        <div class="interval">
+          <label for="minutes" title="Minutes between reminders">Interval</label>
+          <input id="minutes" type="number" min="5" step="5" value="60" />
+        </div>
+        <button id="addBtn" class="primary">+ Add</button>
+      </div>
+
+      <div class="meta">
+        <span id="permStatus" class="pill">🔔 Notification permission: <strong id="permText">unknown</strong></span>
+        <span>⏱️ Reminders: <strong id="runState">stopped</strong></span>
+        <span>📅 Next reminder: <strong id="nextAt">—</strong></span>
+        <span>🗂️ Open tasks: <strong id="openCount">0</strong></span>
+      </div>
+
+      <div id="list" class="list" role="list"></div>
+
+      <div class="status">
+        <button id="toggleBtn" class="btn">Start reminders</button>
+        <button id="nowBtn" class="btn">Send reminder now</button>
+        <button id="clearDoneBtn" class="btn">Clear completed</button>
+        <button id="exportBtn" class="btn">Export</button>
+        <input id="importFile" type="file" accept="application/json" style="display:none" />
+        <button id="importBtn" class="btn">Import</button>
+      </div>
+    </section>
+  </div>
+
+<script>
+(function () {
+  const els = {
+    input: document.getElementById('taskInput'),
+    add: document.getElementById('addBtn'),
+    list: document.getElementById('list'),
+    minutes: document.getElementById('minutes'),
+    toggle: document.getElementById('toggleBtn'),
+    now: document.getElementById('nowBtn'),
+    clearDone: document.getElementById('clearDoneBtn'),
+    exportBtn: document.getElementById('exportBtn'),
+    importBtn: document.getElementById('importBtn'),
+    importFile: document.getElementById('importFile'),
+    notifyBtn: document.getElementById('notifyBtn'),
+    permText: document.getElementById('permText'),
+    permStatus: document.getElementById('permStatus'),
+    runState: document.getElementById('runState'),
+    nextAt: document.getElementById('nextAt'),
+    openCount: document.getElementById('openCount'),
+  };
+
+  // --- State & storage ---
+  const LS_KEY = 'todo.reminder.v1';
+  const state = {
+    tasks: [],
+    running: false,
+    timerId: null,
+    nextEpoch: null,
+  };
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (raw) {
+        const data = JSON.parse(raw);
+        state.tasks = Array.isArray(data.tasks) ? data.tasks : [];
+        state.running = !!data.running;
+        const savedNext = data.nextEpoch ? Number(data.nextEpoch) : null;
+        state.nextEpoch = savedNext && savedNext > Date.now() ? savedNext : null;
+        const savedInterval = Number(data.intervalMin || 60);
+        els.minutes.value = isFinite(savedInterval) && savedInterval > 0 ? savedInterval : 60;
+      }
+    } catch (e) {
+      console.warn('Failed to load state', e);
+    }
+  }
+
+  function save() {
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      tasks: state.tasks,
+      running: state.running,
+      nextEpoch: state.nextEpoch,
+      intervalMin: Number(els.minutes.value) || 60,
+    }));
+  }
+
+  // --- Rendering ---
+  function render() {
+    els.list.innerHTML = '';
+    const frag = document.createDocumentFragment();
+    let open = 0;
+
+    state.tasks.forEach((t) => {
+      if (!t.done) open++;
+      const row = document.createElement('div');
+      row.className = 'item';
+      row.setAttribute('role', 'listitem');
+
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = !!t.done;
+      cb.addEventListener('change', () => {
+        t.done = cb.checked;
+        save(); render();
+      });
+
+      const title = document.createElement('div');
+      title.className = 'title';
+
+      const text = document.createElement('div');
+      text.className = 'text' + (t.done ? ' done' : '');
+      text.textContent = t.text;
+
+      const meta = document.createElement('small');
+      meta.textContent = 'Created ' + new Date(t.created).toLocaleString();
+
+      title.appendChild(text);
+      title.appendChild(meta);
+
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+
+      const del = document.createElement('button');
+      del.className = 'btn danger';
+      del.textContent = 'Delete';
+      del.addEventListener('click', () => {
+        state.tasks = state.tasks.filter(x => x.id !== t.id);
+        save(); render();
+      });
+
+      actions.appendChild(del);
+
+      row.appendChild(cb);
+      row.appendChild(title);
+      row.appendChild(actions);
+      frag.appendChild(row);
+    });
+
+    els.list.appendChild(frag);
+    els.openCount.textContent = String(open);
+    els.runState.textContent = state.running ? 'running' : 'stopped';
+    els.toggle.textContent = state.running ? 'Stop reminders' : 'Start reminders';
+    els.nextAt.textContent = state.nextEpoch ? new Date(state.nextEpoch).toLocaleString() : '—';
+
+    // permission UI
+    const perm = Notification?.permission || 'unsupported';
+    els.permText.textContent = perm;
+    els.permStatus.style.background = perm === 'granted'
+      ? 'rgba(34,197,94,.15)' : 'rgba(96,165,250,.15)';
+    els.permStatus.style.borderColor = perm === 'granted'
+      ? 'rgba(34,197,94,.35)' : 'rgba(96,165,250,.35)';
+  }
+
+  // --- Tasks ---
+  function addTask(text) {
+    const t = (text || '').trim();
+    if (!t) return;
+    state.tasks.unshift({ id: crypto.randomUUID(), text: t, done: false, created: Date.now() });
+    save(); render();
+  }
+
+  // --- Notifications ---
+  function ensurePermission() {
+    if (!('Notification' in window)) {
+      alert('Notifications are not supported in this browser.');
+      return Promise.resolve('unsupported');
+    }
+    if (Notification.permission === 'granted') return Promise.resolve('granted');
+    return Notification.requestPermission();
+  }
+
+  function summarizeOpenTasks() {
+    const open = state.tasks.filter(t => !t.done);
+    const head = open.slice(0, 3).map(t => '• ' + t.text);
+    const extra = open.length > 3 ? `(+${open.length - 3} more)` : '';
+    return {
+      count: open.length,
+      lines: head.length ? head.join('\n') + (extra ? `\n${extra}` : '') : 'No open tasks 🎉',
+    };
+  }
+
+  function sendReminder() {
+    const { count, lines } = summarizeOpenTasks();
+    const title = count ? `You have ${count} open task${count === 1 ? '' : 's'}` : 'All done!';
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const n = new Notification(title, {
+        body: lines,
+        badge: undefined,
+        icon: undefined,
+        tag: 'todo-hourly', // replaces previous
+        renotify: true,
+      });
+      // Optional: focus tab when clicking notification
+      n.onclick = () => window.focus();
+    } else {
+      // Fallback if permission denied/unsupported
+      alert(title + '\n\n' + lines);
+    }
+  }
+
+  // --- Timer control ---
+  function scheduleNext() {
+    clearTimer();
+    const minutes = Math.max(5, Number(els.minutes.value) || 60);
+    const intervalMs = minutes * 60 * 1000;
+
+    // If we have a future saved nextEpoch, use it; else schedule from now
+    const now = Date.now();
+    const next = state.nextEpoch && state.nextEpoch > now
+      ? state.nextEpoch
+      : now + intervalMs;
+
+    const delay = Math.max(0, next - now);
+    state.nextEpoch = next;
+    save();
+    els.nextAt.textContent = new Date(state.nextEpoch).toLocaleString();
+
+    state.timerId = setTimeout(function tick() {
+      sendReminder();
+      const m = Math.max(5, Number(els.minutes.value) || 60) * 60 * 1000;
+      state.nextEpoch = Date.now() + m;
+      save();
+      els.nextAt.textContent = new Date(state.nextEpoch).toLocaleString();
+      state.timerId = setTimeout(tick, m);
+    }, delay);
+  }
+
+  function clearTimer() {
+    if (state.timerId) {
+      clearTimeout(state.timerId);
+      state.timerId = null;
+    }
+  }
+
+  function start() {
+    state.running = true;
+    scheduleNext();
+    save(); render();
+  }
+
+  function stop() {
+    state.running = false;
+    state.nextEpoch = null;
+    clearTimer();
+    save(); render();
+  }
+
+  // --- Wire up UI ---
+  els.add.addEventListener('click', () => addTask(els.input.value));
+  els.input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') addTask(els.input.value);
+  });
+  els.input.addEventListener('input', () => {
+    // optional: auto-trim
+  });
+
+  els.minutes.addEventListener('change', () => {
+    save();
+    if (state.running) scheduleNext();
+  });
+
+  els.toggle.addEventListener('click', async () => {
+    if (!state.running) {
+      const perm = await ensurePermission();
+      if (perm !== 'granted' && perm !== 'unsupported') {
+        // If denied, we still allow fallback alerts
+      }
+      start();
+    } else {
+      stop();
+    }
+  });
+
+  els.now.addEventListener('click', async () => {
+    const perm = await ensurePermission();
+    if (perm !== 'granted' && perm !== 'unsupported') {
+      // continue with alert fallback
+    }
+    sendReminder();
+  });
+
+  els.clearDone.addEventListener('click', () => {
+    const before = state.tasks.length;
+    state.tasks = state.tasks.filter(t => !t.done);
+    const removed = before - state.tasks.length;
+    save(); render();
+    if (removed === 0) return;
+  });
+
+  els.exportBtn.addEventListener('click', () => {
+    const blob = new Blob([localStorage.getItem(LS_KEY) || '{}'], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement('a'), {
+      href: url, download: 'todo-reminder-backup.json'
+    });
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  els.importBtn.addEventListener('click', () => els.importFile.click());
+  els.importFile.addEventListener('change', () => {
+    const f = els.importFile.files?.[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result || '{}'));
+        if (!data || typeof data !== 'object') throw new Error('Invalid file');
+        localStorage.setItem(LS_KEY, JSON.stringify(data));
+        load(); render();
+        if (state.running) scheduleNext();
+      } catch (e) {
+        alert('Import failed: ' + e.message);
+      } finally {
+        els.importFile.value = '';
+      }
+    };
+    reader.readAsText(f);
+  });
+
+  els.notifyBtn.addEventListener('click', async () => {
+    const res = await ensurePermission();
+    render();
+    if (res === 'granted') {
+      new Notification('Notifications enabled', { body: 'Hourly reminders will appear when running.' });
+    } else if (res === 'denied') {
+      alert('You denied notifications. I will use pop-up alerts instead.');
+    } else if (res === 'unsupported') {
+      alert('Notifications unsupported here. I will use pop-up alerts instead.');
+    }
+  });
+
+  // --- Init ---
+  load();
+  render();
+
+  // Try to reflect current permission right away
+  if ('Notification' in window) {
+    els.permText.textContent = Notification.permission;
+  } else {
+    els.permText.textContent = 'unsupported';
+  }
+
+  // Resume timer if previously running
+  if (state.running) scheduleNext();
+
+  // Keep nextAt updated if tab regains focus and we missed a reminder
+  window.addEventListener('focus', () => {
+    if (!state.running) return;
+    const now = Date.now();
+    if (state.nextEpoch && now >= state.nextEpoch) {
+      // Fire missed reminder immediately and reschedule
+      sendReminder();
+      state.nextEpoch = now + Math.max(5, Number(els.minutes.value) || 60) * 60 * 1000;
+      save(); render();
+      scheduleNext();
+    }
+  });
+})();
+</script>
+</body>
+</html>
